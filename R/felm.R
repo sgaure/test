@@ -184,10 +184,28 @@ makematrix <- function(mf, contrasts=NULL, pf=parent.frame(),
       if(length(namref) == 1 && sum(noref&isfac) == 0)
           rflist <- list(gv(namref))
       else
-          rflist <- lapply(namref, function(n) {f <- gv(n); levels(f)[[reflev[[n]]]] <- NA; f})
+        ## GRM: Precursor to larger change below (i.e. don't replace individual
+        ## FEs with NA yet, lest it creates too many reference cases once we
+        ## interact them).
+        # rflist <- lapply(namref, function(n) {f <- gv(n); levels(f)[[reflev[[n]]]] <- NA; f})
+        rflist <- lapply(namref, function(n) {f <- gv(n); f})
       names(rflist) <- namref
-      f <- addNA(do.call(interaction,c(rflist,lapply(names(vars[noref&isfac]), function(n) gv(n)), drop=TRUE)),
-                 ifany=TRUE)
+      ## GRM: Changed this next section of code to account for single reference 
+      ## case in the case of interacted FEs
+      if (length(rflist)==1) {
+        f <- addNA(do.call(interaction,
+                           c(rflist,lapply(names(vars[noref&isfac]), 
+                                           function(n) gv(n)), drop=TRUE)),
+                   ifany=TRUE)
+        
+      } else {
+        f <- do.call(interaction, c(rflist, lapply(names(vars[noref & isfac]), 
+                                                   function(n) gv(n)), 
+                                    drop = TRUE))
+        reflevcomb <- paste(reflev, collapse = ".")
+        levels(f)[which(f==reflevcomb)] <- NA
+        f <- addNA(f, ifany = TRUE) 
+      }
       refnam <- paste(sapply(namref, function(n) levels(gv(n))[reflev[n]]), collapse='+')
       levels(f)[is.na(levels(f))] <- refnam
 #      structure(f, fnam=names(vars)[1], xnam=paste(names(vars)[-1],collapse=':'))
@@ -1090,81 +1108,94 @@ newols <- function(mm, stage1=NULL, pf=parent.frame(), nostats=FALSE, exactDOF=F
 #' @references Cameron, A.C., J.B. Gelbach and D.L. Miller (2011) \cite{Robust
 #' inference with multiway clustering}, Journal of Business & Economic
 #' Statistics 29 (2011), no. 2, 238--249.
-#' \url{http://dx.doi.org/10.1198/jbes.2010.07136}
+#' \doi{10.1198/jbes.2010.07136}
 #' 
 #' Kolesar, M., R. Chetty, J. Friedman, E. Glaeser, and G.W. Imbens (2014)
 #' \cite{Identification and Inference with Many Invalid Instruments}, Journal
 #' of Business & Economic Statistics (to appear).
-#' \url{http://dx.doi.org/10.1080/07350015.2014.978175}
+#' \doi{10.1080/07350015.2014.978175}
 #' @examples
 #' 
-#' oldopts <- options(lfe.threads=1)
+#' ## Default is to use all cores. We'll limit it to 2 for this example.
+#' oldopts <- options("lfe.threads")
+#' options(lfe.threads = 2)
 #' 
 #' ## Simulate data
+#' set.seed(42)
+#' n <- 1e3
 #' 
-#' # Covariates
-#' x <- rnorm(1000)
-#' x2 <- rnorm(length(x))
-#' # Individuals and firms
-#' id <- factor(sample(20,length(x),replace=TRUE))
-#' firm <- factor(sample(13,length(x),replace=TRUE))
-#' # Effects for them
-#' id.eff <- rnorm(nlevels(id))
-#' firm.eff <- rnorm(nlevels(firm))
+#' d <- data.frame(
+#'   # Covariates
+#'   x1 = rnorm(n),
+#'   x2 = rnorm(n),
+#'   # Individuals and firms
+#'   id = factor(sample(20, n, replace=TRUE)),
+#'   firm = factor(sample(13, n, replace=TRUE)),
+#'   # Noise
+#'   u = rnorm(n)
+#'   )
+#'   
+#' # Effects for individuals and firms
+#' id.eff <- rnorm(nlevels(d$id))
+#' firm.eff <- rnorm(nlevels(d$firm))
+#' 
 #' # Left hand side
-#' u <- rnorm(length(x))
-#' y <- x + 0.5*x2 + id.eff[id] + firm.eff[firm] + u
+#' d$y <- d$x1 + 0.5*d$x2 + id.eff[d$id] + firm.eff[d$firm] + d$u
 #' 
 #' ## Estimate the model and print the results
-#' est <- felm(y ~ x + x2 | id + firm)
+#' est <- felm(y ~ x1 + x2 | id + firm, data = d)
 #' summary(est)
-#' 
-#' \dontrun{
 #' # Compare with lm
-#' summary(lm(y ~ x + x2 + id + firm-1))}
+#' summary(lm(y ~ x1 + x2 + id + firm- 1, data = d))
 #' 
 #' ## Example with 'reverse causation' (IV regression)
 #' 
 #' # Q and W are instrumented by x3 and the factor x4.
-#' x3 <- rnorm(length(x))
-#' x4 <- sample(12,length(x),replace=TRUE)
-#' Q <- 0.3*x3 + x + 0.2*x2 + id.eff[id] + 0.3*log(x4) - 0.3*y + rnorm(length(x),sd=0.3)
-#' W <- 0.7*x3 - 2*x + 0.1*x2 - 0.7*id.eff[id] + 0.8*cos(x4) - 0.2*y+ rnorm(length(x),sd=0.6)
+#' d$x3 <- rnorm(n)
+#' d$x4 <- sample(12, n, replace=TRUE)
+#' d$Q <- 0.3*d$x3 + d$x1 + 0.2*d$x2 + id.eff[d$id] + 0.3*log(d$x4) - 0.3*d$y + 
+#'   rnorm(n, sd=0.3)
+#' d$W <- 0.7*d$x3 - 2*d$x1 + 0.1*d$x2 - 0.7*id.eff[d$id] + 0.8*cos(d$x4) - 
+#'   0.2*d$y + rnorm(n, sd=0.6)
+#' 
 #' # Add them to the outcome variable
-#' y <- y + Q + W
+#' d$y <- d$y + d$Q + d$W
 #' 
 #' ## Estimate the IV model and report robust SEs
-#' ivest <- felm(y ~ x + x2 | id + firm | (Q|W ~ x3 + factor(x4)))
-#' summary(ivest, robust=TRUE)
+#' ivest <- felm(y ~ x1 + x2 | id + firm | (Q|W ~ x3 + factor(x4)), data = d)
+#' summary(ivest, robust = TRUE)
 #' condfstat(ivest)
-#' 
-#' \dontrun{
 #' # Compare with the not instrumented fit:
-#' summary(felm(y ~ x + x2 + Q + W | id + firm))}
+#' summary(felm(y ~ x1 + x2 + Q + W | id + firm, data = d))
 #' 
 #' ## Example with multiway clustering
 #' 
 #' # Create a large cluster group (500 clusters) and a small one (20 clusters)
-#' cl1 <- factor(sample(rep(1:500, length.out=length(x))))
-#' cl2 <- factor(sample(rep(1:20, length.out=length(x))))
+#' d$cl1 <- factor(sample(rep(1:500, length.out=n)))
+#' d$cl2 <- factor(sample(rep(1:20, length.out=n)))
 #' # Function for adding clustered noise to our outcome variable 
 #' cl_noise <- function(cl) {
-#'  obs_per_cluster <- length(x)/nlevels(cl)
-#'  unlist(replicate(nlevels(cl), rnorm(obs_per_cluster, mean=rnorm(1), sd=runif(1)), simplify=FALSE))
+#'  obs_per_cluster <- n/nlevels(cl)
+#'  unlist(replicate(nlevels(cl), 
+#'                   rnorm(obs_per_cluster, mean=rnorm(1), sd=runif(1)), 
+#'                   simplify=FALSE))
 #' }
+#' 
 #' # New outcome variable
-#' y_cl <- x + 0.5*x2 + id.eff[id] + firm.eff[firm] + cl_noise(cl1) + cl_noise(cl2)
+#' d$y_cl <- d$x1 + 0.5*d$x2 + id.eff[d$id] + firm.eff[d$firm] + 
+#'   cl_noise(d$cl1) + cl_noise(d$cl2)
 #' 
 #' ## Estimate and print the model with cluster-robust SEs (default)
-#' est_cl <- felm(y_cl ~ x + x2 | id + firm | 0 | cl1 + cl2)
+#' est_cl <- felm(y_cl ~ x1 + x2 | id + firm | 0 | cl1 + cl2, data = d)
 #' summary(est_cl)
 #' 
-#' \dontrun{
 #' # Print ordinary standard errors:
 #' summary(est_cl, robust = FALSE)
 #' # Match cluster-robust SEs from Stata's reghdfe package:
-#' summary(felm(y_cl ~ x + x2 | id + firm | 0 | cl1 + cl2, cmethod="reghdfe"))}
+#' summary(felm(y_cl ~ x1 + x2 | id + firm | 0 | cl1 + cl2, data = d, 
+#'              cmethod = "reghdfe"))
 #' 
+#' ## Restore default options
 #' options(oldopts)
 #' 
 #' @export felm
@@ -1256,10 +1287,12 @@ felm <- function(formula, data, exactDOF=FALSE, subset, na.action,
     if(!is.null(attr(nostats,'boot'))) bootstat <- attr(nostats,'boot')
     iii <- 0
     bootfun <- function() {
-      now <<- Sys.time()
-      iii <<- iii+1
+      assign("now", Sys.time(), inherits = TRUE) # replaces: now <<- Sys.time()
+      iii_tmp <- iii+1 # replaces: iii <<- iii+1
+      assign("iii", iii_tmp, inherits = TRUE)
       if(now > last + pint) {
-        last <<- now; message(date(), ' done boot iter ',iii)
+        assign("last", now, inherits = TRUE) # replaces last <<- now
+        message(date(), ' done boot iter ',iii)
       }
       bootenv <- new.env()
       # we delay assign to avoid unnecessary estimating and copying
@@ -1484,4 +1517,29 @@ felm.mm <- function(mm,nostats,exactDOF,keepX,keepCX,keepModel,kclass=NULL,fulle
 
   z2$call <- match.call()
   z2
+}
+
+#' Check if formula contains redundant FEs
+#' 
+#' Print warning when there is something like fe1+fe1:fe2
+#' @param formula a formula
+#' @examples 
+#' check_redundant_fe(y~ x)
+#' check_redundant_fe(y~ x |fe1 +fe2)
+#' check_redundant_fe(y~ x |fe1 +fe2:fe1)
+#' check_redundant_fe(y~ x |fe2*fe1)
+#' @author Grant McDermott, small adaptation by Matthieu Stigler
+#' @noRd
+check_redundant_fe <- function(formula){
+  fml_chk <- Formula::Formula(formula)
+  has_FE <- length(attr(fml_chk, "rhs"))>1 && !is.null(attr(fml_chk, "rhs")[[2]])
+  if (has_FE) {
+    fes_chk <- attr(terms(formula(fml_chk, rhs=2)), "term.labels")
+    if (any(duplicated(unlist(strsplit(fes_chk, ":"))))) {
+      warning(paste("Duplicated terms detected in the fixed effects slot.",
+                    "If you are interacting factor variables, consider excluding", 
+                    "the parents terms, since these strictly nest the interactions",
+                    "and are thus redundant. See ?felm 'Details'.\n"))
+    }
+  }
 }

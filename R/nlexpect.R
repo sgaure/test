@@ -20,7 +20,7 @@
 #' 
 #' If the function is simple, it can be specified as a quoted expression like
 #' \code{quote(a*b+log(abs(d)))}. In this case, if \code{coefs} is not
-#' specified, it will be set to the list of all the variables occuring in the
+#' specified, it will be set to the list of all the variables occurring in the
 #' expression which are also names of coefficients.
 #' 
 #' \code{fun} may return a vector of values, in which case a vector of
@@ -30,7 +30,7 @@
 #' two cheap 2-dimensional integrals if you do them separately. There is nothing to gain
 #' from using vector-valued functions compared to multiple calls to \code{nlexpect()}.
 #' 
-#' You may of course also integrate inequalites like \code{quote(abs(x1-0.2) >
+#' You may of course also integrate inequalities like \code{quote(abs(x1-0.2) >
 #' 0.2)} to simulate the probability from t-tests or Wald-tests. See the
 #' examples.
 #' 

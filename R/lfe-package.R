@@ -56,7 +56,7 @@
 #' Instrumental variable estimations are supported with 2SLS. Conditional F
 #' statistics for testing reduced rank weak instruments as in \cite{Sanderson
 #' and Windmeijer (2015)} are available in \code{\link{condfstat}}.  Joint
-#' signficance testing of coefficients is available in \code{\link{waldtest}}.
+#' significance testing of coefficients is available in \code{\link{waldtest}}.
 #' 
 #' The centering on the means is done with a tolerance which is set by
 #' \code{options(lfe.eps=1e-8)} (the default).  This is a somewhat conservative
@@ -111,7 +111,7 @@
 #' @docType package
 #' @references Abowd, J.M., F. Kramarz and D.N. Margolis (1999) \cite{High Wage
 #' Workers and High Wage Firms}, Econometrica 67 (1999), no. 2, 251--333.
-#' \url{http://dx.doi.org/10.1111/1468-0262.00020}
+#' \doi{10.1111/1468-0262.00020}
 #' 
 #' Abowd, J.M., R. Creecy and F. Kramarz (2002) \cite{Computing Person and Firm
 #' Effects Using Linked Longitudinal Employer-Employee Data.} Technical Report
@@ -121,25 +121,25 @@
 #' Andrews, M., L. Gill, T. Schank and R. Upward (2008) \cite{High wage workers
 #' and low wage firms: negative assortative matching or limited mobility bias?}
 #' J.R. Stat. Soc.(A) 171(3), 673--697.
-#' \url{http://dx.doi.org/10.1111/j.1467-985X.2007.00533.x}
+#' \doi{10.1111/j.1467-985X.2007.00533.x}
 #' 
 #' Cornelissen, T. (2008) \cite{The stata command felsdvreg to fit a linear
 #' model with two high-dimensional fixed effects.} Stata Journal,
 #' 8(2):170--189, 2008.
-#' \url{http://econpapers.repec.org/RePEc:tsj:stataj:v:8:y:2008:i:2:p:170-189}
+#' \url{https://econpapers.repec.org/RePEc:tsj:stataj:v:8:y:2008:i:2:p:170-189}
 #' 
 #' Correia, S. (2014) \cite{REGHDFE: Stata module to perform linear or
 #' instrumental-variable regression absorbing any number of high-dimensional
 #' fixed effects}, Statistical Software Components, Boston College Department
-#' of Economics. \url{http://econpapers.repec.org/RePEc:boc:bocode:s457874}
+#' of Economics. \url{https://econpapers.repec.org/RePEc:boc:bocode:s457874}
 #' 
 #' Croissant, Y. and G. Millo (2008) \cite{Panel Data Econometrics in R: The
 #' plm Package}, Journal of Statistical Software, 27(2).
-#' \url{http://www.jstatsoft.org/v27/i02/}
+#' \url{https://www.jstatsoft.org/v27/i02/}
 #' 
 #' Gaure, S. (2013) \cite{OLS with Multiple High Dimensional Category
 #' Variables.} Computational Statistics and Data Analysis, 66:8--18, 2013
-#' \url{http://dx.doi.org/10.1016/j.csda.2013.03.024}
+#' \doi{10.1016/j.csda.2013.03.024}
 #' 
 #' Gaure, S. (2014a) \cite{lfe: Linear Group Fixed Effects.} The R Journal,
 #' 5(2):104-117, Dec 2013.
@@ -147,26 +147,27 @@
 #' 
 #' Gaure, S. (2014b), \cite{Correlation bias correction in two-way
 #' fixed-effects linear regression}, Stat 3(1):379-390, 2014.
-#' \url{http://dx.doi.org/10.1002/sta4.68}
+#' \doi{10.1002/sta4.68}
 #' 
 #' Guimaraes, P. and Portugal, P. (2010) \cite{A simple feasible procedure to
 #' fit models with high-dimensional fixed effects.} The Stata Journal,
 #' 10(4):629--649, 2010.
-#' \url{http://www.stata-journal.com/article.html?article=st0212}
+#' \url{https://www.stata-journal.com/article.html?article=st0212}
 #' 
 #' Ouazad, A. (2008) \cite{A2REG: Stata module to estimate models with two
 #' fixed effects.} Statistical Software Components S456942, Boston College
 #' Department of Economics.
-#' \url{http://ideas.repec.org/c/boc/bocode/s456942.html}
+#' \url{https://ideas.repec.org/c/boc/bocode/s456942.html}
 #' 
 #' Sanderson, E. and F. Windmeijer (2014) \cite{A weak instrument F-test in
 #' linear IV models with multiple endogenous variables}, Journal of
 #' Econometrics, 2015.
-#' \url{http://www.sciencedirect.com/science/article/pii/S0304407615001736}
+#' \url{https://www.sciencedirect.com/science/article/pii/S0304407615001736}
 #' @keywords regression models
 #' @examples
 #' 
-#'   oldopts <- options(lfe.threads=1)
+#'   oldopts <- options("lfe.threads")
+#'   options(lfe.threads = 2)
 #'   x <- rnorm(1000)
 #'   x2 <- rnorm(length(x))
 #'   id <- factor(sample(10,length(x),replace=TRUE))

@@ -1,8 +1,8 @@
 # $Id: bccorr.R 2004 2016-04-21 10:31:20Z sgaure $
 narowsum <- function(x, group) {
-  opt <- options(warn=-1)
-  res <- try(rowsum(x,group), silent=TRUE)
-  options(opt)
+  # opt <- options(warn=-1) ## CRAN request to rather use suppressWarnings()
+  res <- suppressWarnings(try(rowsum(x,group), silent=TRUE))
+  # options(opt)
   narow <- is.na(rownames(res))
   if(any(narow))
       res[!narow,,drop=FALSE]
@@ -78,7 +78,7 @@ narowsum <- rowsum
 #' relative tolerance specified by the argument \code{tol}. The covariance
 #' bias is estimated to an absolute tolerance in the correlation \code{rho}
 #' (conditional on the already bias corrected \code{vD} and \code{vF}) specified by
-#' \code{tol}.  The CG algortithm does not need to be exceedingly precise,
+#' \code{tol}.  The CG algorithm does not need to be exceedingly precise,
 #' it is terminated when the solution reaches a precision which is
 #' sufficient for the chosen precision in \code{vD, vF, vDF}.
 #' 
@@ -798,7 +798,7 @@ varvars <- function(est, alpha=getfe(est), tol=0.01, biascorrect=FALSE, lhs=NULL
 #' @seealso \code{\link{varvars}} \code{\link{bccorr}}
 #' @references Gaure, S. (2014), \cite{Correlation bias correction in two-way
 #' fixed-effects linear regression}, Stat 3(1):379-390, 2014.
-#' \url{http://dx.doi.org/10.1002/sta4.68}
+#' \doi{10.1002/sta4.68}
 #' @examples
 #' 
 #' x <- rnorm(5000)

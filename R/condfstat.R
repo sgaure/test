@@ -17,11 +17,12 @@ ivbootstrap <- function(z, x, y, quantiles=0.95, N=100L, cluster=NULL) {
 
   n <- 0
   bias <- replicate(N,{
-    n <<- n + 1
+    n_temp <- n + 1
+    assign("n", n_temp, inherits = TRUE) ## replaces n <<- n+1
     now <- Sys.time()
     if(is.numeric(pint) && pint > 0 && now-last > pint) {
       message(date(), ' Iteration ', n , ' of ', N , ' in IV bootstrap')
-      last <<- now
+      assign("last", now, inherits = TRUE) # replaces: last <<- now
     }
     if(is.null(cluster)) {
       # resampling observations for indep residuals
@@ -140,10 +141,10 @@ ivbootstrap <- function(z, x, y, quantiles=0.95, N=100L, cluster=NULL) {
 #' @references Sanderson, E. and F. Windmeijer (2014) \cite{A weak instrument
 #' F-test in linear IV models with multiple endogenous variables}, Journal of
 #' Econometrics, 2015.
-#' \url{http://www.sciencedirect.com/science/article/pii/S0304407615001736}
+#' \url{https://www.sciencedirect.com/science/article/pii/S0304407615001736}
 #' 
 #' Stock, J.H. and M. Yogo (2004) \cite{Testing for weak instruments in linear
-#' IV regression}, \url{http://ssrn.com/abstract=1734933} in
+#' IV regression}, \url{https://www.ssrn.com/abstract=1734933} in
 #' \cite{Identification and inference for econometric models: Essays in honor
 #' of Thomas Rothenberg}, 2005.
 #' @examples

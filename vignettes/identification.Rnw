@@ -153,7 +153,7 @@ Alternatively, one could specify the model as
 logwage ~ x1 + x2 | firm + edu + id
 @ 
 
-This would not account for a partioning of the labour market along individual/firm, but
+This would not account for a partitioning of the labour market along individual/firm, but
 along firm/education, using a single reference level for the individuals.  
 In this example, there is some reason to suspect that it is
 not sufficient, depending on how \code{edu} is specified. 
@@ -559,7 +559,7 @@ J.~M. Abowd, F.~Kramarz, and D.~N. Margolis, \emph{{High Wage Workers and High
 
 \bibitem{EH74}
 J.~A. Eccleston and A.~Hedayat, \emph{{On the Theory of Connected Designs:
-  Characterization and Optimality}}, Ann. Statist. \textbf{2} (1974),
+  Characterization and Optimality}}, Annals of Statistics \textbf{2} (1974),
   1238--1255.
 
 \bibitem{GS13}
